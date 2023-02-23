@@ -1,6 +1,6 @@
 // select dom elements
 const matchList = document.getElementById("match-list");
-const counterEl = document.getElementById("totalCounter");
+const counterEl = document.getElementById("totalCounter-1");
 const incrementEl = document.getElementById("increment");
 const decrementEl = document.getElementById("decrement");
 
@@ -13,27 +13,46 @@ const incrementElClass = document.getElementsByClassName("incrementInput");
 const decrementElClass = document.getElementsByClassName("decrementInput");
 
 // action identifiers
+const ADD_MATCH = "ADD_MATCH";
+const DELETE_MATCH = "DELETE_MATCH";
 const INCREMENT = "increment";
 const DECREMENT = "decrement";
 const ResetVALUE = "resetValue";
 
 // action creators
-const increment = (value, field) => {
+const addMatch = (id) => {
   return {
-    type: INCREMENT,
+    type: ADD_MATCH,
     payload: {
-      value,
-      field,
+      id,
+    },
+  };
+};
+const deleteMatch = (id) => {
+  return {
+    type: DELETE_MATCH,
+    payload: {
+      id,
     },
   };
 };
 
-const decrement = (value, field) => {
+const increment = (value, id) => {
+  return {
+    type: INCREMENT,
+    payload: {
+      value,
+      id,
+    },
+  };
+};
+
+const decrement = (value, id) => {
   return {
     type: DECREMENT,
     payload: {
       value,
-      field,
+      id,
     },
   };
 };
@@ -44,85 +63,88 @@ const resetValue = () => {
 
 // initial state
 const initialState = {
-  value: 0,
-  field: "",
+  match: [{ id: 1, value: 0 }],
 };
 
 // create reducer function
 function counterReducer(state = initialState, action) {
   switch (action.type) {
-    case INCREMENT:
+    case ADD_MATCH:
       return {
         ...state,
-        value: state.value + action.payload.value,
-        field: action.payload.field,
+        match: [...state.match, { id: action.payload.id, value: 0 }],
+      };
+    case DELETE_MATCH:
+      const matchToRemove = parseInt(action.payload.id);
+      const updatedMatch = state.match.filter((st) => st.id !== matchToRemove);
+      return {
+        ...state,
+        match: updatedMatch,
+      };
+    case INCREMENT:
+      const idINCREMENT = parseInt(action.payload.id.split("-")[1]);
+      return {
+        ...state,
+        match: state.match.map((st) => {
+          if (st.id !== idINCREMENT) {
+            return st;
+          }
+          return {
+            ...st,
+            value: st.value + action.payload.value,
+          };
+        }),
       };
     case DECREMENT:
-      if (state.value > 0) {
-        return {
-          ...state,
-          value: state.value - action.payload.value,
-          field: action.payload.field,
-        };
-      }
+      const idDECREMENT = parseInt(action.payload.id.split("-")[1]);
+      return {
+        ...state,
+        match: state.match.map((st) => {
+          if (st.value > action.payload.value) {
+            if (st.id !== idDECREMENT) {
+              return st;
+            }
+            return {
+              ...st,
+              value: st.value - action.payload.value,
+            };
+          }
+          return {
+            ...st,
+            value: 0,
+          };
+        }),
+      };
     case ResetVALUE:
       return {
         ...state,
-        value: 0,
+        match: state.match.map((st) => {
+          return {
+            ...st,
+            value: 0,
+          };
+        }),
       };
     default:
       return state;
   }
-  // if (action.type === INCREMENT) {
-  //   return {
-  //     ...state,
-  //     value: state.value + action.payload,
-  //   };
-  // } else if (action.type === DECREMENT) {
-  //   if (state.value > 0) {
-  //     return {
-  //       ...state,
-  //       value: state.value - action.payload,
-  //     };
-  //   }
-  // } else if (action.type === ResetVALUE) {
-  //   return {
-  //     ...state,
-  //     value: 0,
-  //   };
-  // } else {
-  //   return state;
-  // }
 }
 
 // create store
 const store = Redux.createStore(counterReducer);
 
 const render = () => {
-  const state = store.getState();
-  console.log(state.field);
-  if (!(state.field.length === 0)) {
-    document.getElementById(`${state?.field}`).innerText =
-      state.value.toString();
-  } else {
-    counterEl.innerText = state.value.toString();
-  }
+  const state = store.getState().match;
+  state.map((st) => {
+    document.getElementById(`totalCounter-${st.id}`).innerText =
+      st.value.toString();
+  });
 };
 
 // update UI initially
 render();
 
 store.subscribe(render);
-
-// button click listeners
-// const incrementForm = document.getElementById("incrementForm");
-// incrementForm.addEventListener("keydown", function (event) {
-//   if (event.key === "Enter") {
-//     event.preventDefault();
-//     const incrementValue = parseInt(incrementEl.value) || 0;
-//     store.dispatch(increment(incrementValue));
-//   }
-// });
 
 matchList.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
@@ -138,19 +160,8 @@ matchList.addEventListener("keydown", function (event) {
     } else {
       console.log("Other");
     }
-    // console.log(event.target.name);
   }
 });
-
-// decrementEl.addEventListener("click", () => {
-// const decrementForm = document.getElementById("decrementForm");
-// decrementForm.addEventListener("keydown", function (event) {
-//   if (event.key === "Enter") {
-//     event.preventDefault();
-//     const decrementValue = parseInt(decrementEl.value) || 0;
-//     store.dispatch(decrement(decrementValue));
-//   }
-// });
 
 // Reset Button
 const resetBtn = document.getElementById("reset-btn");
@@ -169,6 +180,11 @@ matchList.addEventListener("click", function (event) {
     event.target.parentNode.parentNode.parentNode.parentNode.removeChild(
       event.target.parentNode.parentNode.parentNode
     );
+    const deleteMatchId =
+      event.target.parentNode.parentNode.parentNode.children[2].children[0].id.split(
+        "-"
+      )[1];
+    store.dispatch(deleteMatch(deleteMatchId));
   }
 });
 
@@ -177,14 +193,17 @@ const addMatchBtn = document.getElementById("add-match-btn");
 addMatchBtn.addEventListener("click", function () {
   const matchDivSection = document.createElement("div");
   matchDivSection.classList.add("match");
-  // new match length
-  const newMatchLength = document.getElementsByClassName("match").length + 1;
+  // new match id
+  const state = store.getState().match;
+  const lastObject = state[state.length - 1];
+  const newMatchID = lastObject.id + 1;
+
   matchDivSection.innerHTML = `
   <div class="wrapper">
     <button id="delete-btn" class="lws-delete">
       <img src="./image/delete.svg" alt="" />
     </button>
-    <h3 class="lws-matchName">Match ${newMatchLength}</h3>
+    <h3 class="lws-matchName">Match ${newMatchID}</h3>
   </div>
   <div class="inc-dec">
     <form class="incrementForm" id="incrementForm">
@@ -207,8 +226,11 @@ addMatchBtn.addEventListener("click", function () {
     </form>
   </div>
   <div class="numbers">
-    <h2 id="totalCounter-${newMatchLength}" class="lws-singleResult totalCounter">0</h2>
+    <h2 id="totalCounter-${newMatchID}" class="lws-singleResult totalCounter">0</h2>
   </div>
   `;
   matchList.appendChild(matchDivSection);
+
+  //  add match state update
+  store.dispatch(addMatch(newMatchID));
 });
