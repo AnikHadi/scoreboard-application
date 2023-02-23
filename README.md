@@ -8,7 +8,7 @@ Redux Project Scoreboard Application
 
 ## Documentation
 
-[Live Project](https://radiant-moonbeam-99bfde.netlify.app)
+[Live Project](https://funny-rugelach-0e1205.netlify.app)
 
 ## How to run
 
@@ -19,7 +19,7 @@ Please follow the below instructions to run this project in your machine:
 - Clone this repository -
 
 ```bash
-  git clone https://github.com/HadiAnik/
+  git clone https://github.com/Learn-with-Sumit/batch-2---assignment-1---scoreboard-HadiAnik.git
 ```
 
 - Go to the cloned project directory
