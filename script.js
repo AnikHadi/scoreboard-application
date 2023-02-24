@@ -108,11 +108,15 @@ function counterReducer(state = initialState, action) {
               ...st,
               value: st.value - action.payload.value,
             };
+          } else {
+            if (st.id !== idDECREMENT) {
+              return st;
+            }
+            return {
+              ...st,
+              value: 0,
+            };
           }
-          return {
-            ...st,
-            value: 0,
-          };
         }),
       };
     case ResetVALUE:
@@ -154,9 +158,11 @@ matchList.addEventListener("keydown", function (event) {
     if (event.target.name === INCREMENT) {
       const incrementValue = parseInt(event.target.value) || 0;
       store.dispatch(increment(incrementValue, totalValueId));
+      event.target.value = "";
     } else if (event.target.name === DECREMENT) {
       const decrementValue = parseInt(event.target.value) || 0;
       store.dispatch(decrement(decrementValue, totalValueId));
+      event.target.value = "";
     } else {
       console.log("Other");
     }
