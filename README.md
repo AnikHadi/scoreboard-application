@@ -19,7 +19,7 @@ Please follow the below instructions to run this project in your machine:
 - Clone this repository -
 
 ```bash
-  git clone https://github.com/Learn-with-Sumit/batch-2---assignment-1---scoreboard-HadiAnik.git
+  git clone https://github.com/HadiAnik/scoreboard-application.git
 ```
 
 - Go to the cloned project directory
@@ -27,3 +27,17 @@ Please follow the below instructions to run this project in your machine:
 ```bash
   cd scoreboard-application
 ```
+
+- Install dependencies
+
+```bash
+  npm i
+```
+
+- Start the react project.
+
+```bash
+  npm start
+```
+
+Your app should be available in http://localhost:3000
